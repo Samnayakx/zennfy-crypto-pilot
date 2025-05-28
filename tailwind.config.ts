@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -86,6 +85,7 @@ export default {
 				}
 			},
 			fontFamily: {
+				'montserrat': ['Montserrat', 'system-ui', 'sans-serif'],
 				'sf': ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'system-ui', 'sans-serif'],
 			},
 			borderRadius: {

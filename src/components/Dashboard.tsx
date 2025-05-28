@@ -4,7 +4,6 @@ import { Header } from "./Header";
 import { HomeScreen } from "./HomeScreen";
 import { AIChat } from "./AIChat";
 import { UserProfile } from "./UserProfile";
-import { ApiKeyManager } from "./ApiKeyManager";
 import { ZenStartFlow } from "./ZenStartFlow";
 import { MessageCircle, BarChart3, User, Home } from "lucide-react";
 
@@ -17,12 +16,7 @@ const tabs = [
 
 export const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("home");
-  const [hasApiKeys, setHasApiKeys] = useState(false);
   const [showZenStart, setShowZenStart] = useState(false);
-
-  if (!hasApiKeys) {
-    return <ApiKeyManager onKeysAdded={() => setHasApiKeys(true)} />;
-  }
 
   if (showZenStart) {
     return <ZenStartFlow onComplete={() => setShowZenStart(false)} />;
@@ -32,7 +26,7 @@ export const Dashboard = () => {
     <div className="min-h-screen bg-ios-gray-950">
       <Header />
       
-      <main className="pb-20">
+      <main className="pb-20 pt-4">
         {activeTab === "home" && <HomeScreen onStartZenFlow={() => setShowZenStart(true)} />}
         {activeTab === "portfolio" && <HomeScreen onStartZenFlow={() => setShowZenStart(true)} />}
         {activeTab === "chat" && <AIChat />}

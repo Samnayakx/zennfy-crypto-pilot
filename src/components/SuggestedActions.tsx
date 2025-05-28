@@ -34,25 +34,25 @@ const suggestedActions = [
 
 export const SuggestedActions = () => {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <Zap className="w-5 h-5 text-ios-purple" />
-        <h2 className="text-xl font-bold text-white">Suggested Actions</h2>
+    <div className="space-y-5">
+      <div className="flex items-center space-x-3">
+        <Zap className="w-6 h-6 text-ios-purple" />
+        <h2 className="text-2xl font-bold text-white">Suggested Actions</h2>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {suggestedActions.map((action, index) => {
           const Icon = action.icon;
           return (
             <button
               key={index}
-              className={`glass-card rounded-xl p-4 border ${action.borderColor} ${action.bgColor} hover:scale-105 transition-all duration-200 text-left group`}
+              className={`glass-card rounded-xl p-5 border ${action.borderColor} ${action.bgColor} hover:scale-105 transition-all duration-200 text-left group`}
             >
-              <div className="flex items-center space-x-3">
-                <div className={`w-10 h-10 ${action.bgColor} rounded-lg flex items-center justify-center`}>
-                  <Icon className={`w-5 h-5 ${action.color}`} />
+              <div className="flex items-center space-x-4">
+                <div className={`w-12 h-12 ${action.bgColor} rounded-xl flex items-center justify-center`}>
+                  <Icon className={`w-6 h-6 ${action.color}`} />
                 </div>
-                <span className={`font-medium ${action.color} group-hover:brightness-110`}>
+                <span className={`font-semibold text-base ${action.color} group-hover:brightness-110`}>
                   {action.text}
                 </span>
               </div>

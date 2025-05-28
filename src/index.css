@@ -90,7 +90,7 @@
   }
 
   body {
-    @apply bg-ios-gray-950 text-white font-sf antialiased;
+    @apply bg-ios-gray-950 text-white font-montserrat antialiased;
   }
 
   /* Custom scrollbar for webkit browsers */
