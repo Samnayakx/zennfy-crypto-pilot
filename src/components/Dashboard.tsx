@@ -1,23 +1,31 @@
 
 import { useState } from "react";
 import { Header } from "./Header";
-import { CryptoGrid } from "./CryptoGrid";
+import { HomeScreen } from "./HomeScreen";
 import { AIChat } from "./AIChat";
+import { UserProfile } from "./UserProfile";
 import { ApiKeyManager } from "./ApiKeyManager";
-import { MessageCircle, BarChart3, Settings } from "lucide-react";
+import { ZenStartFlow } from "./ZenStartFlow";
+import { MessageCircle, BarChart3, User, Home } from "lucide-react";
 
 const tabs = [
+  { id: "home", label: "Home", icon: Home },
   { id: "portfolio", label: "Portfolio", icon: BarChart3 },
   { id: "chat", label: "AI Chat", icon: MessageCircle },
-  { id: "settings", label: "Settings", icon: Settings }
+  { id: "profile", label: "Profile", icon: User }
 ];
 
 export const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState("portfolio");
+  const [activeTab, setActiveTab] = useState("home");
   const [hasApiKeys, setHasApiKeys] = useState(false);
+  const [showZenStart, setShowZenStart] = useState(false);
 
   if (!hasApiKeys) {
     return <ApiKeyManager onKeysAdded={() => setHasApiKeys(true)} />;
+  }
+
+  if (showZenStart) {
+    return <ZenStartFlow onComplete={() => setShowZenStart(false)} />;
   }
 
   return (
@@ -25,17 +33,14 @@ export const Dashboard = () => {
       <Header />
       
       <main className="pb-20">
-        {activeTab === "portfolio" && <CryptoGrid />}
+        {activeTab === "home" && <HomeScreen onStartZenFlow={() => setShowZenStart(true)} />}
+        {activeTab === "portfolio" && <HomeScreen onStartZenFlow={() => setShowZenStart(true)} />}
         {activeTab === "chat" && <AIChat />}
-        {activeTab === "settings" && (
-          <div className="p-6">
-            <ApiKeyManager onKeysAdded={() => {}} showTitle={false} />
-          </div>
-        )}
+        {activeTab === "profile" && <UserProfile />}
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 glass-card border-t border-ios-gray-800">
+      <nav className="fixed bottom-0 left-0 right-0 glass-card border-t border-ios-gray-800/50 backdrop-blur-xl">
         <div className="flex items-center justify-around py-3 px-6">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -45,10 +50,10 @@ export const Dashboard = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center space-y-1 py-2 px-4 rounded-lg transition-all duration-200 ${
+                className={`flex flex-col items-center space-y-1 py-2 px-4 rounded-xl transition-all duration-300 ${
                   isActive 
-                    ? 'text-ios-blue bg-ios-blue/10' 
-                    : 'text-ios-gray-500 hover:text-ios-gray-300'
+                    ? 'text-ios-blue bg-ios-blue/10 scale-105' 
+                    : 'text-ios-gray-500 hover:text-ios-gray-300 hover:bg-ios-gray-800/50'
                 }`}
               >
                 <Icon className="w-6 h-6" />

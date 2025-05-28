@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, TrendingUp, Lightbulb } from "lucide-react";
+import { Send, Sparkles, TrendingUp, Lightbulb, ThumbsUp, ThumbsDown, Bookmark, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -8,22 +8,31 @@ interface Message {
   content: string;
   isUser: boolean;
   timestamp: Date;
+  liked?: boolean;
+  saved?: boolean;
 }
+
+const trendingPrompts = [
+  "What's happening with Bitcoin today?",
+  "Explain staking in simple terms",
+  "Is now a good time to buy crypto?",
+  "What causes crypto prices to crash?"
+];
 
 const quickPrompts = [
   {
     icon: TrendingUp,
-    text: "What's happening with Bitcoin today?",
+    text: "What's trending in crypto?",
     color: "text-ios-green"
   },
   {
     icon: Lightbulb,
-    text: "Explain what staking means",
+    text: "Explain like I'm 5: DeFi",
     color: "text-ios-blue"
   },
   {
     icon: Sparkles,
-    text: "Should I invest in Ethereum?",
+    text: "Should I invest in altcoins?",
     color: "text-ios-purple"
   }
 ];
@@ -32,13 +41,14 @@ export const AIChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hi! I'm your Zennfy AI assistant. I can help you understand crypto concepts, explain market trends, and guide your investment decisions. What would you like to learn about today?",
+      content: "Hey! 👋 I'm your crypto co-pilot. I speak human, not Wall Street. What would you like to learn about today?",
       isUser: false,
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showGlossary, setShowGlossary] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -65,11 +75,10 @@ export const AIChat = () => {
     setIsTyping(true);
 
     try {
-      // Simulate API call to Perplexity
       setTimeout(() => {
         const aiResponse: Message = {
           id: (Date.now() + 1).toString(),
-          content: `Great question! I'd be happy to help you understand that. Since this is a demo, I'm showing you a sample response. In the full version, I would use Perplexity's API to analyze real-time crypto data and provide personalized insights about "${message}".`,
+          content: `Great question! 🎯 Here's the deal: ${message.toLowerCase().includes('bitcoin') ? 'Bitcoin is like digital gold - people buy it when they want to store value.' : message.toLowerCase().includes('ethereum') ? 'Ethereum is like a computer that runs apps - but those apps handle money.' : 'Crypto can seem wild, but there are usually logical reasons behind the movements.'} \n\nWant me to break this down even more? I'm here to make it crystal clear! ✨`,
           isUser: false,
           timestamp: new Date()
         };
@@ -97,8 +106,67 @@ export const AIChat = () => {
     sendMessage(prompt);
   };
 
+  const handleMessageAction = (messageId: string, action: 'like' | 'dislike' | 'save') => {
+    setMessages(prev => prev.map(msg => {
+      if (msg.id === messageId) {
+        if (action === 'like') return { ...msg, liked: !msg.liked };
+        if (action === 'save') return { ...msg, saved: !msg.saved };
+      }
+      return msg;
+    }));
+    
+    if (action === 'save') {
+      toast({
+        title: "Saved!",
+        description: "Added to your learnings",
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-140px)]">
+      {/* Chat Header */}
+      <div className="px-6 py-4 border-b border-ios-gray-800/50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ios-purple rounded-xl flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-white font-semibold">AI Chat</h2>
+              <p className="text-ios-gray-400 text-sm">Your crypto co-pilot</p>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setShowGlossary(!showGlossary)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              showGlossary 
+                ? 'bg-ios-blue text-white' 
+                : 'bg-ios-gray-800 text-ios-gray-400 hover:bg-ios-gray-700'
+            }`}
+          >
+            Still learning?
+          </button>
+        </div>
+
+        {/* Trending Pills */}
+        <div className="mt-4 space-y-2">
+          <p className="text-ios-gray-400 text-xs font-medium">🔥 What's trending</p>
+          <div className="flex flex-wrap gap-2">
+            {trendingPrompts.slice(0, 2).map((prompt, index) => (
+              <button
+                key={index}
+                onClick={() => handleQuickPrompt(prompt)}
+                className="bg-ios-gray-800/50 hover:bg-ios-gray-700 text-ios-gray-300 text-xs px-3 py-2 rounded-full border border-ios-gray-700 transition-all hover:border-ios-blue/50"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map((message) => (
@@ -107,10 +175,10 @@ export const AIChat = () => {
             className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl relative group ${
                 message.isUser
-                  ? 'bg-ios-blue text-white'
-                  : 'glass-card text-white'
+                  ? 'bg-gradient-to-r from-ios-blue to-ios-purple text-white'
+                  : 'glass-card text-white border border-ios-gray-800/50'
               }`}
             >
               <p className="text-sm leading-relaxed">{message.content}</p>
@@ -119,17 +187,44 @@ export const AIChat = () => {
               }`}>
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
+              
+              {!message.isUser && (
+                <div className="flex items-center space-x-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleMessageAction(message.id, 'like')}
+                    className={`p-1 rounded hover:bg-ios-gray-700 transition-colors ${
+                      message.liked ? 'text-ios-green' : 'text-ios-gray-500'
+                    }`}
+                  >
+                    <ThumbsUp className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => handleMessageAction(message.id, 'dislike')}
+                    className="p-1 rounded hover:bg-ios-gray-700 transition-colors text-ios-gray-500"
+                  >
+                    <ThumbsDown className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => handleMessageAction(message.id, 'save')}
+                    className={`p-1 rounded hover:bg-ios-gray-700 transition-colors ${
+                      message.saved ? 'text-ios-blue' : 'text-ios-gray-500'
+                    }`}
+                  >
+                    <Bookmark className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
 
         {isTyping && (
           <div className="flex justify-start">
-            <div className="glass-card max-w-xs px-4 py-3 rounded-2xl">
+            <div className="glass-card max-w-xs px-4 py-3 rounded-2xl border border-ios-gray-800/50">
               <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-ios-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-ios-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                <div className="w-2 h-2 bg-ios-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <div className="w-2 h-2 bg-ios-blue rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-ios-blue rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                <div className="w-2 h-2 bg-ios-blue rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
               </div>
             </div>
           </div>
@@ -141,7 +236,7 @@ export const AIChat = () => {
       {/* Quick Prompts */}
       {messages.length === 1 && (
         <div className="px-6 pb-4">
-          <p className="text-ios-gray-400 text-sm mb-3">Quick questions to get started:</p>
+          <p className="text-ios-gray-400 text-sm mb-3">💡 Quick starters:</p>
           <div className="space-y-2">
             {quickPrompts.map((prompt, index) => {
               const Icon = prompt.icon;
@@ -149,7 +244,7 @@ export const AIChat = () => {
                 <button
                   key={index}
                   onClick={() => handleQuickPrompt(prompt.text)}
-                  className="w-full glass-card rounded-xl p-3 text-left hover:bg-ios-gray-800/80 transition-all duration-200 active:scale-98"
+                  className="w-full glass-card rounded-xl p-3 text-left hover:bg-ios-gray-800/80 transition-all duration-200 active:scale-98 border border-ios-gray-800/50"
                 >
                   <div className="flex items-center space-x-3">
                     <Icon className={`w-5 h-5 ${prompt.color}`} />
@@ -163,7 +258,7 @@ export const AIChat = () => {
       )}
 
       {/* Input */}
-      <div className="p-6 border-t border-ios-gray-800">
+      <div className="p-6 border-t border-ios-gray-800/50">
         <form onSubmit={handleSubmit} className="flex space-x-3">
           <input
             type="text"
@@ -176,7 +271,7 @@ export const AIChat = () => {
           <button
             type="submit"
             disabled={!inputValue.trim() || isTyping}
-            className="p-3 bg-ios-blue rounded-xl hover:bg-ios-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
+            className="p-3 bg-gradient-to-r from-ios-blue to-ios-purple rounded-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
             <Send className="w-5 h-5 text-white" />
           </button>
