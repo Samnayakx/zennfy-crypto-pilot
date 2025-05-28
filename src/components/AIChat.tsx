@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Sparkles, TrendingUp, Lightbulb, ThumbsUp, ThumbsDown, Bookmark, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { fetchPerplexityResponse } from "@/services/perplexityService";
 
 interface Message {
   id: string;
@@ -75,25 +76,37 @@ export const AIChat = () => {
     setIsTyping(true);
 
     try {
-      setTimeout(() => {
-        const aiResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          content: `Great question! 🎯 Here's the deal: ${message.toLowerCase().includes('bitcoin') ? 'Bitcoin is like digital gold - people buy it when they want to store value.' : message.toLowerCase().includes('ethereum') ? 'Ethereum is like a computer that runs apps - but those apps handle money.' : 'Crypto can seem wild, but there are usually logical reasons behind the movements.'} \n\nWant me to break this down even more? I'm here to make it crystal clear! ✨`,
-          isUser: false,
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, aiResponse]);
-        setIsTyping(false);
-      }, 2000);
+      console.log("Sending message to Perplexity API:", message);
+      const aiResponseContent = await fetchPerplexityResponse(message);
+      
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: aiResponseContent,
+        isUser: false,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, aiResponse]);
+      setIsTyping(false);
     } catch (error) {
       console.error("Error sending message:", error);
+      
+      // Provide a helpful fallback response
+      const fallbackResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "I'm currently unable to connect to the AI service. Please check that you've added your Perplexity API key in the Profile settings. You can get a free API key from perplexity.ai. \n\nIn the meantime, I'd be happy to help once you've set up the API connection! 🔧",
+        isUser: false,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, fallbackResponse]);
+      setIsTyping(false);
+      
       toast({
-        title: "Error",
-        description: "Failed to send message. Please check your API key.",
+        title: "API Connection Error",
+        description: "Please add your Perplexity API key in Profile settings",
         variant: "destructive"
       });
-      setIsTyping(false);
     }
   };
 
@@ -181,7 +194,7 @@ export const AIChat = () => {
                   : 'glass-card text-white border border-ios-gray-800/50'
               }`}
             >
-              <p className="text-sm leading-relaxed">{message.content}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
               <p className={`text-xs mt-2 ${
                 message.isUser ? 'text-blue-100' : 'text-ios-gray-500'
               }`}>
